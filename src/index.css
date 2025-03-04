@@ -1,0 +1,120 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 90%;
+
+    --radius: 0.25rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    text-rendering: optimizeSpeed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+
+  button, .btn {
+    @apply transition-all duration-200;
+  }
+  
+  img {
+    @apply max-w-full h-auto;
+    content-visibility: auto;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply relative text-sm uppercase tracking-wide py-1 after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[1px] after:bottom-0 after:left-0 after:bg-black after:transition-transform after:duration-300 hover:after:scale-x-100;
+  }
+
+  .product-card {
+    @apply relative overflow-hidden transition-transform duration-300 hover:scale-[1.02];
+    will-change: transform;
+  }
+
+  .product-card img {
+    @apply transition-transform duration-500 hover:scale-[1.03];
+    will-change: transform;
+  }
+
+  .category-btn {
+    @apply px-3 py-1 sm:px-4 sm:py-1.5 border border-black text-xs uppercase tracking-wider hover:bg-black hover:text-white transition-colors duration-300;
+  }
+  
+  .image-fade {
+    @apply opacity-0 animate-image-reveal;
+    animation-fill-mode: forwards;
+  }
+
+  .section-fade {
+    @apply opacity-0 animate-fade-in;
+    animation-fill-mode: forwards;
+  }
+
+  .title-slide {
+    @apply opacity-0 animate-slide-up;
+    animation-fill-mode: forwards;
+  }
+}
+
+/* Fix animation performance */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Fix mobile responsiveness for FeaturedProducts */
+@media (max-width: 640px) {
+  .product-card {
+    margin-bottom: 1rem;
+  }
+
+  .category-btn {
+    margin-bottom: 0.5rem;
+  }
+}
