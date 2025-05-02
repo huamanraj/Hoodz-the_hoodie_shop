@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, ShoppingBag, Menu, X } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -6,6 +5,13 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/use-cart';
 import Search from './Search';
 import Cart from './Cart';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
+
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -52,7 +58,7 @@ const Navbar = () => {
               <nav className="hidden md:flex items-center space-x-8">
                 <Link to="/products" className="nav-link">COLLECTIONS</Link>
                 <Link to="/products?category=new" className="nav-link">NEW PRODUCT</Link>
-                <a href="#" className="nav-link">GLOBAL</a>
+                <Link to="/products" className="nav-link">POPULAR</Link>
               </nav>
             )}
           </div>
@@ -66,7 +72,15 @@ const Navbar = () => {
               <nav className="hidden md:flex items-center space-x-8">
                 <a href="#" className="nav-link">SALE</a>
                 <a href="#" className="nav-link">STORIES</a>
-                <Link to="/products" className="nav-link">POPULAR</Link>
+                <SignedIn>
+                  <Link to="/profile" className="nav-link">PROFILE</Link>
+                 
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <span className="nav-link">LOGIN</span>
+                  </SignInButton>
+                </SignedOut>
               </nav>
             )}
             <div className="flex items-center space-x-4">
@@ -98,10 +112,18 @@ const Navbar = () => {
               <nav className="flex flex-col space-y-4">
                 <Link to="/products" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">COLLECTIONS</Link>
                 <Link to="/products?category=new" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">NEW PRODUCT</Link>
-                <a href="#" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">GLOBAL</a>
+                <Link to="/products" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">POPULAR</Link>
                 <a href="#" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">SALE</a>
                 <a href="#" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">STORIES</a>
-                <Link to="/products" className="text-sm uppercase tracking-wide py-2">POPULAR</Link>
+                <SignedIn>
+                  <Link to="/profile" className="text-sm uppercase tracking-wide py-2">PROFILE</Link>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <span className="text-sm uppercase tracking-wide py-2">LOGIN</span>
+                  </SignInButton>
+                </SignedOut>
               </nav>
             </div>
           </div>

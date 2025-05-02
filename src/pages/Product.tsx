@@ -1,24 +1,99 @@
-
-import React from 'react';
-import Layout from '../components/Layout';
-import { useParams } from 'react-router-dom';
-import { productData } from '../data/products';
+import React, { useState } from 'react';
+import Layout from '@/components/Layout';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
-import { useCart } from '../hooks/use-cart';
+import { useCart } from '@/hooks/use-cart';
 import { toast } from '@/hooks/use-toast';
+import { useProduct } from '@/hooks/use-products';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Product = () => {
-  const { id } = useParams();
+  const { id = '' } = useParams();
+  const navigate = useNavigate();
+  const { data: product, isLoading, error } = useProduct(id);
   const { addToCart } = useCart();
-  const product = productData.find(p => p.id === id) || productData[0];
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const handleAddToCart = () => {
-    addToCart(product);
+    if (!product) return;
+    
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      toast({
+        title: "Please select a size",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addToCart({
+      id: product._id,
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      description: product.description,
+      category: product.category,
+      size: selectedSize || undefined
+    });
+    
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart`,
     });
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12 md:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
+            <Skeleton className="h-[500px] w-full" />
+            
+            <div className="flex flex-col space-y-6">
+              <div className="border-b pb-4">
+                <Skeleton className="h-10 w-2/3 mb-2" />
+                <Skeleton className="h-6 w-1/3" />
+              </div>
+              
+              <div className="space-y-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              
+              <div>
+                <Skeleton className="h-4 w-20 mb-2" />
+                <div className="flex space-x-2">
+                  {["S", "M", "L", "XL"].map((size) => (
+                    <Skeleton key={size} className="h-10 w-10" />
+                  ))}
+                </div>
+              </div>
+              
+              <Skeleton className="h-12 w-full mt-8" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12 md:py-20 text-center">
+          <h2 className="text-2xl font-bold mb-4">Product not found</h2>
+          <p className="mb-8 text-gray-600">We couldn't find the product you're looking for.</p>
+          <button
+            onClick={() => navigate('/products')}
+            className="border border-black px-6 py-2 hover:bg-black hover:text-white transition-colors"
+          >
+            View All Products
+          </button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -53,19 +128,22 @@ const Product = () => {
                 <p className="text-gray-700">{product.description}</p>
               </div>
               
-              <div>
-                <h3 className="text-sm uppercase tracking-wider mb-2">Size</h3>
-                <div className="flex space-x-2">
-                  {["S", "M", "L", "XL"].map((size) => (
-                    <button 
-                      key={size}
-                      className="border border-black w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                    >
-                      {size}
-                    </button>
-                  ))}
+              {product.sizes && product.sizes.length > 0 && (
+                <div>
+                  <h3 className="text-sm uppercase tracking-wider mb-2">Size</h3>
+                  <div className="flex space-x-2">
+                    {product.sizes.map((size) => (
+                      <button 
+                        key={size}
+                        className={`border ${selectedSize === size ? 'bg-black text-white' : 'border-black'} w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white transition-colors`}
+                        onClick={() => setSelectedSize(size)}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             
             <button 

@@ -1,32 +1,40 @@
-
 export interface Product {
-  id: string;
+  _id: string;         // Changed from id to _id to match MongoDB
   name: string;
   description: string;
   price: number;
   image: string;
   category: string;
+  sizes?: string[];    // Optional sizes array
+  inStock?: boolean;   // Optional in stock status
+  tags?: string[];     // Optional tags array
+  createdAt?: string;  // Optional timestamp
+  updatedAt?: string;  // Optional timestamp
 }
 
 export const productData: Product[] = [
   {
-    id: '1',
+    _id: '1',   // Changed from id to _id
     name: 'Classic Black Hoodie',
     description: 'A classic black hoodie made from premium cotton. Features a kangaroo pocket and adjustable drawstrings.',
     price: 79.99,
     image: 'https://images.unsplash.com/photo-1578681994506-b8f463449011?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-    category: 'men'
+    category: 'men',
+    sizes: ['S', 'M', 'L', 'XL'],
+    inStock: true
   },
   {
-    id: '2',
+    _id: '2',   // Changed from id to _id
     name: 'Cream Oversized Hoodie',
     description: 'An oversized hoodie in a soft cream color. Perfect for a relaxed, casual look.',
     price: 89.99,
     image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-    category: 'women'
+    category: 'women',
+    sizes: ['S', 'M', 'L', 'XL'],
+    inStock: true
   },
   {
-    id: '3',
+    _id: '3',
     name: 'Minimalist Gray Hoodie',
     description: 'A minimalist gray hoodie with subtle logo detailing. Made from a cotton-polyester blend for comfort and durability.',
     price: 74.99,
@@ -34,7 +42,7 @@ export const productData: Product[] = [
     category: 'men'
   },
   {
-    id: '4',
+    _id: '4',
     name: 'Pastel Blue Hoodie',
     description: 'A pastel blue hoodie with a relaxed fit. Features ribbed cuffs and hem for added comfort.',
     price: 84.99,
@@ -42,7 +50,7 @@ export const productData: Product[] = [
     category: 'women'
   },
   {
-    id: '5',
+    _id: '5',
     name: 'Vintage Red Hoodie',
     description: 'A vintage-inspired red hoodie with distressed details. Made from soft, pre-washed fabric for that lived-in feel.',
     price: 94.99,
@@ -50,7 +58,7 @@ export const productData: Product[] = [
     category: 'men'
   },
   {
-    id: '6',
+    _id: '6',
     name: 'Eco-friendly Green Hoodie',
     description: 'An eco-friendly hoodie made from organic cotton and recycled materials. Features a unique green hue.',
     price: 99.99,
@@ -58,7 +66,7 @@ export const productData: Product[] = [
     category: 'new'
   },
   {
-    id: '7',
+    _id: '7',
     name: 'Premium White Hoodie',
     description: 'A premium white hoodie made from the finest materials. Features minimalist design and exceptional comfort.',
     price: 109.99,
@@ -66,7 +74,7 @@ export const productData: Product[] = [
     category: 'new'
   },
   {
-    id: '8',
+    _id: '8',
     name: 'Graphic Print Hoodie',
     description: 'A statement hoodie featuring unique graphic prints. Made from high-quality cotton for everyday wear.',
     price: 89.99,
