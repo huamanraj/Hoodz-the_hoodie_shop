@@ -1,6 +1,6 @@
 import { Product } from '../types/product';
 
-const API_URL = 'http://localhost:5000/api/v1';
+const API_URL = "https://hoodz-backend.vercel.app/api/v1";
 
 type FetchProductsParams = {
   category?: string;
