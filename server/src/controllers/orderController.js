@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Order = require('../models/orderModel');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const { sendOrderConfirmationEmail, sendPaymentFailureEmail } = require('../utils/emailUtils');
+const { sendOrderConfirmationEmail, sendPaymentFailureEmail, sendTestEmail, verifyEmailConfig } = require('../utils/emailUtils');
 
 // Initialize Razorpay with proper error handling
 let razorpay;
@@ -50,10 +50,19 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 
   try {
+    // Get customer email - check if it's a placeholder and use shipping info if possible
+    let userEmail = req.auth.claims.email;
+    
+    // If we have a placeholder email and shipping address has email, use that
+    if (userEmail.includes('@example.com') && shippingAddress && shippingAddress.email) {
+      userEmail = shippingAddress.email;
+      console.log(`Using shipping address email instead: ${userEmail}`);
+    }
+    
     // Create order in database
     const order = new Order({
       userId: req.auth.userId,
-      userEmail: req.auth.claims.email,
+      userEmail: userEmail,
       orderItems,
       shippingAddress,
       paymentMethod,
@@ -147,10 +156,39 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       email_address: req.auth.claims.email,
     };
 
+    // Make sure user email is set and not a placeholder
+    if (!order.userEmail || 
+        order.userEmail === 'not_available' || 
+        order.userEmail.includes('@example.com')) {
+      
+      // Try to get a better email from different sources
+      const betterEmail = req.body.email || 
+                         req.auth.claims.email || 
+                         order.shippingAddress.email;
+      
+      if (betterEmail && !betterEmail.includes('@example.com')) {
+        order.userEmail = betterEmail;
+        console.log(`Updated order email to: ${order.userEmail}`);
+      } else {
+        console.log(`No valid email found for order: ${order._id}`);
+      }
+    }
+
     const updatedOrder = await order.save();
     
-    // Send success email
-    await sendOrderConfirmationEmail(updatedOrder);
+    // Send success email only if we have a valid email (not example.com)
+    if (!updatedOrder.userEmail.includes('@example.com')) {
+      try {
+        console.log(`Attempting to send order confirmation email to: ${updatedOrder.userEmail}`);
+        await sendOrderConfirmationEmail(updatedOrder);
+        console.log(`Successfully sent order confirmation email to: ${updatedOrder.userEmail}`);
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+        // Continue execution - don't fail the order just because email failed
+      }
+    } else {
+      console.log(`Skipping email for order ${order._id} - no valid email address available`);
+    }
     
     res.json(updatedOrder);
   } catch (error) {
@@ -181,9 +219,45 @@ const getMyOrders = asyncHandler(async (req, res) => {
   res.json(orders);
 });
 
+// @desc    Test email configuration
+// @route   POST /api/v1/orders/test-email
+// @access  Private
+const testEmailConfig = asyncHandler(async (req, res) => {
+  try {
+    const userEmail = req.auth.claims.email;
+    
+    if (!userEmail || userEmail === 'customer@example.com') {
+      res.status(400);
+      throw new Error('Valid user email not found in authentication token');
+    }
+    
+    console.log(`Sending test email to: ${userEmail}`);
+    
+    // Verify email configuration first
+    if (!verifyEmailConfig()) {
+      res.status(500);
+      throw new Error('Email not configured. Check server environment variables.');
+    }
+    
+    const result = await sendTestEmail(userEmail);
+    
+    res.json({
+      success: true,
+      message: 'Test email sent successfully',
+      emailId: result.messageId,
+      sentTo: userEmail
+    });
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.status(500);
+    throw new Error(`Failed to send test email: ${error.message}`);
+  }
+});
+
 module.exports = {
   createOrder,
   getOrderById,
   updateOrderToPaid,
   getMyOrders,
+  testEmailConfig
 };

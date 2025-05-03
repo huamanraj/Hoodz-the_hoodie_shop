@@ -36,11 +36,13 @@ const getOrderSuccessTemplate = (order) => {
         th { text-align: left; padding: 10px; border-bottom: 2px solid #000; }
         .summary { margin-top: 20px; background-color: #f9f9f9; padding: 15px; }
         .button { display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; margin-top: 15px; }
+        .logo { font-size: 32px; font-weight: bold; letter-spacing: 2px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
+          <div class="logo">HOODZ</div>
           <h1>Order Confirmed!</h1>
         </div>
         <div class="content">
@@ -82,7 +84,7 @@ const getOrderSuccessTemplate = (order) => {
           </p>
           
           <p>We'll send you another email when your items have been shipped.</p>
-          <a href="${process.env.FRONTEND_URL}/orders/${order._id}" class="button">View Order Details</a>
+          <a href="https://hoodz.vercel.app/orders/${order._id}" class="button">View Order Details</a>
         </div>
         <div class="footer">
           <p>If you have any questions, please contact our customer service at support@hoodz.com</p>
@@ -108,11 +110,13 @@ const getOrderFailedTemplate = (order, errorMessage) => {
         .content { padding: 20px; border: 1px solid #f5c6cb; }
         .footer { padding: 20px; text-align: center; font-size: 12px; color: #777; }
         .button { display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; margin-top: 15px; }
+        .logo { font-size: 32px; font-weight: bold; letter-spacing: 2px; color: #333; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
+          <div class="logo">HOODZ</div>
           <h1>Payment Failed</h1>
         </div>
         <div class="content">
@@ -131,7 +135,7 @@ const getOrderFailedTemplate = (order, errorMessage) => {
           <p>You can try placing your order again by visiting our website.</p>
           <p>If you continue to face issues, please contact our customer support team.</p>
           
-          <a href="${process.env.FRONTEND_URL}/cart" class="button">Return to Cart</a>
+          <a href="https://hoodz.vercel.app/cart" class="button">Return to Cart</a>
         </div>
         <div class="footer">
           <p>If you have any questions, please contact our customer service at support@hoodz.com</p>
@@ -186,6 +190,12 @@ const sendPaymentFailureEmail = async (order, errorMessage) => {
       return;
     }
 
+    // Ensure order has a valid email
+    if (!order.userEmail || order.userEmail === 'not_available' || order.userEmail === 'user@example.com') {
+      console.error('Order missing valid email address:', order.userEmail);
+      return;
+    }
+
     const mailOptions = {
       from: `"Hoodz Store" <${process.env.EMAIL_USER}>`,
       to: order.userEmail,
@@ -202,7 +212,85 @@ const sendPaymentFailureEmail = async (order, errorMessage) => {
   }
 };
 
+/**
+ * Test email configuration by sending a test email
+ * @param {String} toEmail - Email address to send test to
+ * @returns {Promise} - Nodemailer send result
+ */
+const sendTestEmail = async (toEmail) => {
+  try {
+    // Verify email configuration
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.error('Email configuration missing. Check EMAIL_USER and EMAIL_APP_PASSWORD env variables.');
+      throw new Error('Email configuration missing');
+    }
+
+    const mailOptions = {
+      from: `"Hoodz Store" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: 'Hoodz Email Configuration Test',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Email Test</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #000; color: #fff; padding: 20px; text-align: center; }
+            .content { padding: 20px; border: 1px solid #eee; }
+            .footer { padding: 20px; text-align: center; font-size: 12px; color: #777; }
+            .logo { font-size: 32px; font-weight: bold; letter-spacing: 2px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">HOODZ</div>
+              <h1>Email Configuration Test</h1>
+            </div>
+            <div class="content">
+              <p>This is a test email from your Hoodz application.</p>
+              <p>If you received this email, your email configuration is working correctly.</p>
+              <p><strong>Time sent:</strong> ${new Date().toLocaleString()}</p>
+              <p>Visit our website to shop the latest hoodies!</p>
+              <a href="https://hoodz.vercel.app" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; margin-top: 15px;">Visit Hoodz</a>
+            </div>
+            <div class="footer">
+              <p>If you have any questions, please contact our customer service at support@hoodz.com</p>
+              <p>&copy; ${new Date().getFullYear()} Hoodz. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Test email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    throw error;
+  }
+};
+
+// Helper function to verify email configuration
+const verifyEmailConfig = () => {
+  const isConfigured = process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD;
+  if (!isConfigured) {
+    console.error('EMAIL CONFIGURATION ERROR: Missing EMAIL_USER or EMAIL_APP_PASSWORD environment variables');
+  }
+  return isConfigured;
+};
+
+// Call verification on module load
+verifyEmailConfig();
+
 module.exports = {
   sendOrderConfirmationEmail,
-  sendPaymentFailureEmail
+  sendPaymentFailureEmail,
+  sendTestEmail,
+  verifyEmailConfig
 };

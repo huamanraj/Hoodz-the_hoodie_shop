@@ -1,5 +1,6 @@
 const axios = require('axios');
 const asyncHandler = require('express-async-handler');
+const { clerkClient } = require('@clerk/clerk-sdk-node');
 
 // Protect routes - verify the Clerk token and attach user data
 const protect = asyncHandler(async (req, res, next) => {
@@ -17,16 +18,22 @@ const protect = asyncHandler(async (req, res, next) => {
       // For Clerk tokens we'll extract the basic info without validation
       const decodedToken = decodeClerkJWT(token);
       
+      // Get the userId from the token
+      const userId = decodedToken.sub;
+      
+      // Get user email using Clerk SDK
+      const userEmail = await fetchUserEmailFromClerk(userId);
+      
       console.log('Decoded user info:', {
-        userId: decodedToken.sub,
-        email: decodedToken.email || 'not_available'
+        userId: userId,
+        email: userEmail
       });
       
       // Attach user info to req object
       req.auth = {
-        userId: decodedToken.sub,
+        userId: userId,
         claims: {
-          email: decodedToken.email || 'user@example.com'
+          email: userEmail
         }
       };
 
@@ -65,6 +72,49 @@ function decodeClerkJWT(token) {
   } catch (error) {
     console.error('Token decode error:', error.message);
     throw new Error(`Invalid token format: ${error.message}`);
+  }
+}
+
+// Fetch user email using Clerk SDK
+async function fetchUserEmailFromClerk(userId) {
+  try {
+    // Check if Clerk SDK is properly initialized with API key
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.warn('CLERK_SECRET_KEY is not set in environment variables');
+      return 'customer@example.com';
+    }
+
+    // Get user details using Clerk SDK
+    const user = await clerkClient.users.getUser(userId);
+    
+    // Get primary email if available
+    if (user.primaryEmailAddressId) {
+      try {
+        const emailAddress = await clerkClient.emailAddresses.getEmailAddress(user.primaryEmailAddressId);
+        return emailAddress.emailAddress;
+      } catch (emailErr) {
+        console.error('Error getting primary email:', emailErr.message);
+      }
+    }
+    
+    // If primary email fails, try to get any email from the user's email addresses
+    if (user.emailAddresses && user.emailAddresses.length > 0) {
+      for (const emailObj of user.emailAddresses) {
+        try {
+          const emailAddress = await clerkClient.emailAddresses.getEmailAddress(emailObj.id);
+          return emailAddress.emailAddress;
+        } catch (emailErr) {
+          console.error(`Error getting email (${emailObj.id}):`, emailErr.message);
+          continue;
+        }
+      }
+    }
+    
+    console.warn('No valid email addresses found for user:', userId);
+    return userId + '@example.com';
+  } catch (error) {
+    console.error('Error fetching user from Clerk:', error.message);
+    return 'customer@example.com';
   }
 }
 

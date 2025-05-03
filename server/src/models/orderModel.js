@@ -77,6 +77,24 @@ const orderSchema = mongoose.Schema(
     deliveredAt: {
       type: Date,
     },
+    // Add this field to capture additional emails from various sources
+    emailCaptureAttempts: [
+      {
+        source: {
+          type: String,
+          enum: ['clerk', 'token', 'payment', 'shipping', 'manual'],
+          required: true
+        },
+        email: {
+          type: String,
+          required: true
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ]
   },
   {
     timestamps: true,
