@@ -3,62 +3,9 @@ import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { ArrowLeft, Search, Package, TruckIcon, CheckCircle } from "lucide-react";
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-
-// Mock data for orders
-const orders = [
-  {
-    id: 'ORD-12345',
-    date: 'May 12, 2023',
-    status: 'Delivered',
-    total: 79.99,
-    items: [
-      {
-        id: '1',
-        name: 'Classic Black Hoodie',
-        price: 79.99,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1578681994506-b8f463449011?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-      }
-    ]
-  },
-  {
-    id: 'ORD-12346',
-    date: 'June 3, 2023',
-    status: 'Processing',
-    total: 164.98,
-    items: [
-      {
-        id: '2',
-        name: 'Cream Oversized Hoodie',
-        price: 89.99,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-      },
-      {
-        id: '6',
-        name: 'Eco-friendly Green Hoodie',
-        price: 74.99,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1516826957135-700dedea698c?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-      }
-    ]
-  },
-  {
-    id: 'ORD-12347',
-    date: 'July 21, 2023',
-    status: 'Shipped',
-    total: 94.99,
-    items: [
-      {
-        id: '5',
-        name: 'Vintage Red Hoodie',
-        price: 94.99,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1584829476759-747279a58b21?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-      }
-    ]
-  }
-];
+import { useOrders } from '@/hooks/use-orders';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -72,6 +19,13 @@ const getStatusIcon = (status: string) => {
 };
 
 const Orders = () => {
+  const { data: orders, isLoading, error } = useOrders();
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredOrders = orders?.filter(order => 
+    order._id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12 md:py-16">
@@ -94,20 +48,66 @@ const Orders = () => {
                   type="text" 
                   placeholder="Search orders..." 
                   className="pl-10 pr-4 py-2 border rounded-md w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-black"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
             </div>
             
-            {orders.length > 0 ? (
+            {isLoading ? (
+              // Loading state
               <div className="space-y-6">
-                {orders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                {[1, 2, 3].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                    <div className="p-4 sm:p-6 border-b bg-gray-50">
+                      <div className="flex justify-between">
+                        <div>
+                          <Skeleton className="h-4 w-24 mb-2" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </div>
+                    <div className="p-4 sm:p-6">
+                      <div className="flex gap-4 mb-6">
+                        <Skeleton className="h-20 w-20" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-40 mb-2" />
+                          <Skeleton className="h-4 w-20 mb-2" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </div>
+                      <div className="flex justify-between pt-4 border-t">
+                        <Skeleton className="h-6 w-20" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-10 w-24" />
+                          <Skeleton className="h-10 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              // Error state
+              <div className="text-center py-12 bg-white rounded-lg border">
+                <Package size={48} className="mx-auto mb-4 text-gray-300" />
+                <h2 className="text-xl font-medium mb-2">Error loading orders</h2>
+                <p className="text-gray-600 mb-6">There was an error loading your orders. Please try again later.</p>
+              </div>
+            ) : filteredOrders && filteredOrders.length > 0 ? (
+              // Orders list
+              <div className="space-y-6">
+                {filteredOrders.map((order) => (
+                  <div key={order._id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
                     <div className="p-4 sm:p-6 border-b bg-gray-50">
                       <div className="flex flex-col sm:flex-row justify-between gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">Order #{order.id}</p>
-                          <p className="text-sm text-gray-500">Placed on {order.date}</p>
+                          <p className="text-sm text-gray-500">Order #{order._id}</p>
+                          <p className="text-sm text-gray-500">
+                            Placed on {format(new Date(order.createdAt), 'MMM dd, yyyy')}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
                           {getStatusIcon(order.status)}
@@ -117,8 +117,8 @@ const Orders = () => {
                     </div>
                     
                     <div className="p-4 sm:p-6">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex flex-col sm:flex-row gap-4 py-4 border-b last:border-b-0">
+                      {order.orderItems.map((item, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row gap-4 py-4 border-b last:border-b-0">
                           <div className="w-20 h-20 bg-gray-100 flex-shrink-0">
                             <img 
                               src={item.image} 
@@ -134,6 +134,9 @@ const Orders = () => {
                             <div>
                               <h3 className="font-medium">{item.name}</h3>
                               <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                              {item.size && (
+                                <p className="text-sm text-gray-600">Size: {item.size}</p>
+                              )}
                             </div>
                             <p className="font-medium">${item.price.toFixed(2)}</p>
                           </div>
@@ -143,22 +146,35 @@ const Orders = () => {
                       <div className="flex justify-between mt-6 pt-4 border-t">
                         <div>
                           <p className="text-sm text-gray-600">Total</p>
-                          <p className="font-medium">${order.total.toFixed(2)}</p>
+                          <p className="font-medium">${order.totalPrice.toFixed(2)}</p>
                         </div>
                         <div className="flex gap-2">
                           <button className="px-4 py-2 border rounded hover:bg-gray-50 text-sm">
                             Track Order
                           </button>
-                          <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 text-sm">
+                          <Link 
+                            to={`/orders/${order._id}`} 
+                            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 text-sm"
+                          >
                             Order Details
-                          </button>
+                          </Link>
                         </div>
                       </div>
+                      
+                      {order.paymentResult && (
+                        <div className="mt-4 pt-4 border-t">
+                          <p className="text-sm text-gray-600 mb-1">Payment ID: {order.paymentResult.id}</p>
+                          <p className="text-sm text-gray-600">
+                            Payment Status: <span className="text-green-500 font-medium">{order.isPaid ? 'Paid' : 'Pending'}</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
+              // No orders
               <div className="text-center py-12 bg-white rounded-lg border">
                 <Package size={48} className="mx-auto mb-4 text-gray-300" />
                 <h2 className="text-xl font-medium mb-2">No orders yet</h2>

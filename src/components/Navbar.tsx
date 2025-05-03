@@ -12,7 +12,6 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 
-
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -34,6 +33,21 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Close mobile menu when user navigates away
+  useEffect(() => {
+    const cleanup = () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    return cleanup;
+  }, [mobileMenuOpen]);
+
+  const handleCartClick = () => {
+    setCartOpen(true);
+  };
 
   return (
     <>
@@ -74,7 +88,6 @@ const Navbar = () => {
                 <a href="#" className="nav-link">STORIES</a>
                 <SignedIn>
                   <Link to="/profile" className="nav-link">PROFILE</Link>
-                 
                 </SignedIn>
                 <SignedOut>
                   <SignInButton>
@@ -87,12 +100,14 @@ const Navbar = () => {
               <button 
                 className="p-1"
                 onClick={() => setSearchOpen(true)}
+                aria-label="Search products"
               >
                 <SearchIcon size={20} />
               </button>
               <button 
                 className="p-1 relative"
-                onClick={() => setCartOpen(true)}
+                onClick={handleCartClick}
+                aria-label="Open shopping cart"
               >
                 <ShoppingBag size={20} />
                 {totalItems > 0 && (

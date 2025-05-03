@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Orders from "./pages/Orders";
+import OrderDetail from './pages/OrderDetail';
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -29,11 +30,10 @@ const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    
       
         <TooltipProvider>
-          <CartProvider>
-            <BrowserRouter>
+          
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/product/:id" element={<Product />} />
@@ -43,14 +43,15 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="*" element={<NotFound />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/orders/:id" element={<OrderDetail />} />
               </Routes>
-            </BrowserRouter>
+            
             <Toaster />
             <Sonner />
-          </CartProvider>
+         
         </TooltipProvider>
       
-    </QueryClientProvider>
+
   );
 }
 

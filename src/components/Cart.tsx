@@ -1,11 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import { Link } from 'react-router-dom';
+import CheckoutModal from './CheckoutModal';
 
 const Cart = () => {
   const { cart, cartOpen, setCartOpen, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
   const cartRef = useRef<HTMLDivElement>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
+  // Close cart when checkout is opened
+  useEffect(() => {
+    if (checkoutOpen) {
+      setCartOpen(false);
+    }
+  }, [checkoutOpen, setCartOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -23,7 +32,12 @@ const Cart = () => {
     };
   }, [cartOpen, setCartOpen]);
 
-  if (!cartOpen) return null;
+  const handleCheckout = () => {
+    setCheckoutOpen(true);
+  };
+
+  if (!cartOpen && !checkoutOpen) return null;
+  if (checkoutOpen) return <CheckoutModal isOpen={checkoutOpen} onClose={() => setCheckoutOpen(false)} />;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
@@ -36,7 +50,8 @@ const Cart = () => {
           <h2 className="text-xl font-medium">Shopping Cart ({totalItems})</h2>
           <button 
             onClick={() => setCartOpen(false)}
-            className="p-1"
+            className="p-1 hover:bg-gray-100 rounded-full"
+            aria-label="Close cart"
           >
             <X size={20} />
           </button>
@@ -112,7 +127,10 @@ const Cart = () => {
                 <span className="font-medium">${subtotal.toFixed(2)}</span>
               </div>
               <p className="text-sm text-gray-600 mb-4">Shipping and taxes calculated at checkout</p>
-              <button className="w-full bg-black text-white py-3 hover:bg-gray-800 transition-colors">
+              <button 
+                onClick={handleCheckout}
+                className="w-full bg-black text-white py-3 hover:bg-gray-800 transition-colors"
+              >
                 CHECKOUT
               </button>
             </div>
