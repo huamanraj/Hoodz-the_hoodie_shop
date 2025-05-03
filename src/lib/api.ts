@@ -15,6 +15,11 @@ type ProductsResponse = {
   total: number;
 };
 
+type SearchProductsParams = {
+  query: string;
+  limit?: number;
+};
+
 export const fetchProducts = async (params: FetchProductsParams = {}): Promise<ProductsResponse> => {
   const queryParams = new URLSearchParams();
   
@@ -36,6 +41,26 @@ export const fetchProducts = async (params: FetchProductsParams = {}): Promise<P
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to fetch products');
+  }
+  
+  return response.json();
+};
+
+export const searchProducts = async (params: SearchProductsParams): Promise<Product[]> => {
+  const queryParams = new URLSearchParams();
+  
+  queryParams.append('query', params.query);
+  
+  if (params.limit) {
+    queryParams.append('limit', params.limit.toString());
+  }
+  
+  const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+  const response = await fetch(`${API_URL}/products/search${queryString}`);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to search products');
   }
   
   return response.json();

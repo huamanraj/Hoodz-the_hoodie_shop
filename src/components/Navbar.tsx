@@ -124,19 +124,21 @@ const Navbar = () => {
         {isMobile && mobileMenuOpen && (
           <div className="absolute top-full left-0 w-full bg-white border-t border-gray-100 animate-fade-in" style={{ animationFillMode: 'forwards' }}>
             <div className="container mx-auto py-6 px-4">
-              <nav className="flex flex-col space-y-4">
-                <Link to="/products" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">COLLECTIONS</Link>
-                <Link to="/products?category=new" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">NEW PRODUCT</Link>
-                <Link to="/products" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">POPULAR</Link>
-                <a href="#" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">SALE</a>
-                <a href="#" className="text-sm uppercase tracking-wide py-2 border-b border-gray-100">STORIES</a>
+              <nav className="flex flex-col items-center space-y-4 text-center">
+                <Link to="/products" className="w-full text-sm uppercase tracking-wide py-2 border-b border-gray-100 text-center">COLLECTIONS</Link>
+                <Link to="/products?category=new" className="w-full text-sm uppercase tracking-wide py-2 border-b border-gray-100 text-center">NEW PRODUCT</Link>
+                <Link to="/products" className="w-full text-sm uppercase tracking-wide py-2 border-b border-gray-100 text-center">POPULAR</Link>
+                <a href="#" className="w-full text-sm uppercase tracking-wide py-2 border-b border-gray-100 text-center">SALE</a>
+                <a href="#" className="w-full text-sm uppercase tracking-wide py-2 border-b border-gray-100 text-center">STORIES</a>
                 <SignedIn>
-                  <Link to="/profile" className="text-sm uppercase tracking-wide py-2">PROFILE</Link>
-                  <UserButton afterSignOutUrl="/" />
+                  <Link to="/profile" className="w-full text-sm uppercase tracking-wide py-2 text-center">PROFILE</Link>
+                  <div className="flex justify-center pt-2">
+                    <UserButton afterSignOutUrl="/" />
+                  </div>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton>
-                    <span className="text-sm uppercase tracking-wide py-2">LOGIN</span>
+                    <span className="w-full text-sm uppercase tracking-wide py-2 text-center block">LOGIN</span>
                   </SignInButton>
                 </SignedOut>
               </nav>

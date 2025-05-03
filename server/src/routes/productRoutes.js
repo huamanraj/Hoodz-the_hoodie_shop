@@ -5,8 +5,12 @@ const {
   getProductById, 
   createProduct, 
   updateProduct, 
-  deleteProduct 
+  deleteProduct,
+  searchProducts 
 } = require('../controllers/productController');
+
+// Add search route before specific ID routes to avoid conflicts
+router.get('/search', searchProducts);
 
 router.route('/')
   .get(getProducts)

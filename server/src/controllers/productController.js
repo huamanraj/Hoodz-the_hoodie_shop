@@ -102,10 +102,34 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Search products
+// @route   GET /api/v1/products/search
+// @access  Public
+const searchProducts = asyncHandler(async (req, res) => {
+  const { query, limit = 8 } = req.query;
+  
+  if (!query) {
+    res.status(400);
+    throw new Error('Search query is required');
+  }
+
+  // Create a case-insensitive regex search for the product name
+  const searchFilter = {
+    name: { $regex: query, $options: 'i' }
+  };
+  
+  const products = await Product.find(searchFilter)
+    .limit(Number(limit))
+    .sort({ createdAt: -1 });
+  
+  res.json(products);
+});
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  searchProducts
 };
