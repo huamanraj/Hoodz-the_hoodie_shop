@@ -1,69 +1,87 @@
-# Welcome to your Lovable project
+# HOODZ - Premium Hoodie Marketplace
 
-## Project info
+## Overview
 
-**URL**: https://lovable.dev/projects/3fa5113b-3794-43be-ad04-fb3d7053795a
+HOODZ is a modern e-commerce platform specializing in premium hoodies and streetwear collections. Built with React, TypeScript, and a Node.js backend, it offers a seamless shopping experience for urban fashion enthusiasts.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- 🛍️ **Curated Collection**: Browse through our exclusive selection of premium hoodies
+- 🔐 **User Authentication**: Secure login/signup with Clerk integration
+- 🛒 **Shopping Cart**: Easy-to-use cart functionality with persistent storage
+- 💳 **Secure Payments**: Integrated with Razorpay for safe transactions
+- 📱 **Responsive Design**: Optimized for all devices with a modern UI using Shadcn components
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3fa5113b-3794-43be-ad04-fb3d7053795a) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend
+- React + TypeScript
+- Vite for fast builds
+- TailwindCSS for styling
+- Shadcn UI components
+- React Router for navigation
+- React Query for data fetching
 
-**Use your preferred IDE**
+### Backend
+- Node.js + Express
+- MongoDB with Mongoose
+- Clerk for authentication
+- Razorpay payment integration
+- Nodemailer for transactional emails
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB instance
+- Clerk account for authentication
+- Razorpay account for payments
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone the repository
+```bash
+git clone repo
+cd hoodz
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install frontend dependencies
+```bash
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Install backend dependencies
+```bash
+cd server
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Set up environment variables
+   - Create `.env` file in the root directory
+   - Create `.env` file in the server directory
+
+5. Start development servers
+
+Frontend:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Backend:
+```bash
+cd server
+npm run dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+6. Seed the database (optional)
+```bash
+cd server
+npm run seed
+```
 
-**Use GitHub Codespaces**
+## Deployment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The application is configured for deployment on Vercel (frontend) and can be deployed to any Node.js hosting service for the backend.
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/3fa5113b-3794-43be-ad04-fb3d7053795a) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+> amanraj.me
