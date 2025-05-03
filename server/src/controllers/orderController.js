@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Order = require('../models/orderModel');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { sendOrderConfirmationEmail, sendPaymentFailureEmail } = require('../utils/emailUtils');
 
 // Initialize Razorpay with proper error handling
 let razorpay;
@@ -118,28 +119,58 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 
-  // Verify payment signature
-  const generated_signature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-    .update(razorpay_order_id + '|' + razorpay_payment_id)
-    .digest('hex');
+  try {
+    // Verify payment signature
+    const generated_signature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
 
-  if (generated_signature !== razorpay_signature) {
-    res.status(400);
-    throw new Error('Payment verification failed');
+    if (generated_signature !== razorpay_signature) {
+      // Payment verification failed - send failure email
+      await sendPaymentFailureEmail(
+        order, 
+        "Payment signature verification failed. This may be due to an unauthorized payment attempt."
+      );
+      
+      res.status(400);
+      throw new Error('Payment verification failed');
+    }
+
+    // Update order with payment details
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    order.paymentResult = {
+      id: razorpay_payment_id,
+      status: 'COMPLETED',
+      update_time: Date.now().toString(),
+      email_address: req.auth.claims.email,
+    };
+
+    const updatedOrder = await order.save();
+    
+    // Send success email
+    await sendOrderConfirmationEmail(updatedOrder);
+    
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    
+    // Only send failure email if the error is not from email sending itself
+    if (!error.message.includes('Error sending')) {
+      try {
+        await sendPaymentFailureEmail(
+          order, 
+          `There was an issue processing your payment: ${error.message}`
+        );
+      } catch (emailError) {
+        console.error('Error sending payment failure email:', emailError);
+      }
+    }
+    
+    res.status(500);
+    throw new Error(`Payment processing failed: ${error.message}`);
   }
-
-  order.isPaid = true;
-  order.paidAt = Date.now();
-  order.paymentResult = {
-    id: razorpay_payment_id,
-    status: 'COMPLETED',
-    update_time: Date.now().toString(),
-    email_address: req.auth.claims.email,
-  };
-
-  const updatedOrder = await order.save();
-  res.json(updatedOrder);
 });
 
 // @desc    Get logged in user orders

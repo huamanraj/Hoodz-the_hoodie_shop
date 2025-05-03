@@ -8,8 +8,8 @@ import Cart from './Cart';
 import {
   SignedIn,
   SignedOut,
-  SignInButton,
   UserButton,
+  useClerk
 } from "@clerk/clerk-react";
 
 const Navbar = () => {
@@ -18,6 +18,7 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const isMobile = useIsMobile();
   const { setCartOpen, totalItems } = useCart();
+  const { openSignIn } = useClerk();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,9 +91,8 @@ const Navbar = () => {
                   <Link to="/profile" className="nav-link">PROFILE</Link>
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton>
-                    <span className="nav-link">LOGIN</span>
-                  </SignInButton>
+                  {/* Use Clerk's openSignIn instead of Link */}
+                  <button onClick={() => openSignIn()} className="nav-link">LOGIN</button>
                 </SignedOut>
               </nav>
             )}
@@ -137,9 +137,8 @@ const Navbar = () => {
                   </div>
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton>
-                    <span className="w-full text-sm uppercase tracking-wide py-2 text-center block">LOGIN</span>
-                  </SignInButton>
+                  {/* Use Clerk's openSignIn instead of Link */}
+                  <button onClick={() => openSignIn()} className="w-full text-sm uppercase tracking-wide py-2 text-center block">LOGIN</button>
                 </SignedOut>
               </nav>
             </div>

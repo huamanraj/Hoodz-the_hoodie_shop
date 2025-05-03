@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useCreateOrder, updateOrderPaymentStatus } from '@/hooks/use-orders';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { useUser, useAuth, useClerk } from '@clerk/clerk-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,7 @@ const CheckoutModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   const { cart, subtotal, clearCart } = useCart();
   const { user, isSignedIn } = useUser();
   const { getToken } = useAuth();
+  const { openSignIn } = useClerk();
   const navigate = useNavigate();
   const createOrder = useCreateOrder();
   const queryClient = useQueryClient();
@@ -78,7 +79,8 @@ const CheckoutModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         variant: "destructive",
       });
       onClose();
-      navigate('/login');
+      // Use Clerk's openSignIn instead of redirecting to custom login page
+      openSignIn({ redirectUrl: window.location.href });
       return;
     }
 
